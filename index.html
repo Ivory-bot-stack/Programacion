@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brandon Lacayo · Introducción a la Programación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,100..900,0..100&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+@property --h{syntax:'<number>';inherits:true;initial-value:265}
+:root{--h:265;--sv:0;--av:0;--ink:#1b1630;--txt:#f3ecdd;--acc:hsl(var(--h) 90% 72%);
+ --serif:'Fraunces',Georgia,'Times New Roman',serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+ transition:--h 1.4s ease;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark}
+html{scroll-snap-type:y proximity;scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box;margin:0}
+body{background:hsl(var(--h) 45% 6%);color:var(--txt);font:350 1.1rem/1.65 var(--serif);overflow-x:hidden;transition:background 1.4s}
+body.lock{overflow:hidden}
+/* ambient layers */
+.mesh{position:fixed;inset:-20%;z-index:-3;background:
+ radial-gradient(at 20% 20%,hsl(var(--h) 70% 38%/.55),transparent 50%),
+ radial-gradient(at 80% 30%,hsl(calc(var(--h) + 45) 70% 32%/.5),transparent 50%),
+ radial-gradient(at 50% 90%,hsl(calc(var(--h) - 45) 60% 28%/.6),transparent 55%);animation:drift 26s ease-in-out infinite alternate}
+@keyframes drift{to{transform:rotate(12deg) scale(1.15) translate(4%,-3%)}}
+.beam{position:fixed;inset:-30%;z-index:-2;pointer-events:none;mix-blend-mode:screen;opacity:.16;
+ background:linear-gradient(115deg,transparent 40%,hsl(var(--h) 100% 85%/.6) 48%,transparent 56%);animation:beam 18s ease-in-out infinite alternate}
+@keyframes beam{from{transform:translateX(-12%) rotate(-2deg)}to{transform:translateX(12%) rotate(3deg)}}
+#dust{position:fixed;inset:0;z-index:-1;pointer-events:none;width:100%;height:100%}
+.grain{position:fixed;inset:-50%;z-index:60;pointer-events:none;opacity:.09;mix-blend-mode:overlay;animation:grain .7s steps(6) infinite;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-4%,3%)}40%{transform:translate(3%,-5%)}60%{transform:translate(-6%,-2%)}80%{transform:translate(5%,4%)}100%{transform:translate(0,0)}}
+.bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--acc);transform:scaleX(0);transform-origin:left;z-index:70}
+.dot,.trail{position:fixed;left:0;top:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;pointer-events:none;z-index:80;background:var(--acc)}
+.trail{opacity:.35;transform:scale(.6)}
+@media(pointer:coarse){.dot,.trail{display:none}}
+/* nav dots */
+nav{position:fixed;right:1.1rem;top:50%;translate:0 -50%;display:flex;flex-direction:column;gap:14px;z-index:50}
+nav a{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--txt);opacity:.5;transition:.4s;display:block}
+nav a.on{background:var(--acc);border-color:var(--acc);opacity:1;scale:1.4}
+nav a:hover,nav a:focus-visible{opacity:1;outline:2px solid var(--acc);outline-offset:3px}
+/* scenes */
+.scene{position:relative;min-height:100svh;display:grid;place-items:center;padding:12vh 7vw;scroll-snap-align:start;overflow:hidden}
+.in{width:min(1100px,100%);transform:perspective(1100px) rotateX(calc(var(--sv)*4deg)) scale(calc(1 - var(--av)*.025));filter:blur(calc(var(--av)*1.6px));will-change:transform}
+.wrap{transition:filter 1s,opacity 1s}
+.scene:not(.on) .wrap{filter:blur(5px);opacity:.25}
+.glyph{position:absolute;font:900 clamp(10rem,32vw,30rem)/1 var(--mono);color:hsl(var(--h) 80% 70%/.05);pointer-events:none;user-select:none;white-space:nowrap}
+h1,h2{font-family:var(--serif);font-variation-settings:"wght" var(--w,600),"SOFT" var(--s,50);letter-spacing:var(--ls,-.02em);line-height:1.02;
+ text-shadow:calc(var(--sv)*5px) 0 hsl(350 100% 60%/.55),calc(var(--sv)*-5px) 0 hsl(190 100% 60%/.55)}
+h1{font-size:clamp(3rem,10vw,8.5rem)}
+h2{font-size:clamp(2.4rem,6.5vw,5rem);margin-bottom:.5em}
+.kick{color:var(--acc);font-size:1.05rem;margin-bottom:1rem;font-style:italic}
+.sub{max-width:34ch;margin-top:1.6rem;font-size:1.3rem;opacity:.85}
+.mask{background:linear-gradient(100deg,hsl(var(--h) 95% 75%),hsl(calc(var(--h) + 70) 95% 70%),hsl(calc(var(--h) - 60) 95% 72%),hsl(var(--h) 95% 75%));background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:flow 9s linear infinite;text-shadow:none}
+@keyframes flow{to{background-position:-300% 0}}
+.ch{display:inline-block;will-change:transform}
+.scene [data-split] .ch{opacity:0}
+.seen [data-split] .ch,.splash .ch{animation:inkin 1s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i)*38ms + var(--d,0ms))}
+@keyframes inkin{from{opacity:0;transform:translateY(.55em) rotate(5deg);filter:blur(9px)}to{opacity:1;transform:none;filter:blur(0)}}
+.cue{margin-top:3rem;display:inline-flex;gap:.6rem;align-items:center;opacity:.7;font-style:italic}
+.cue i{width:1px;height:38px;background:var(--acc);animation:cue 1.8s ease-in-out infinite;transform-origin:top}
+@keyframes cue{50%{transform:scaleY(.3)}}
+/* glossary */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.4rem}
+.card{position:relative;padding:1.6rem 1.5rem;border-radius:22px;background:hsl(var(--h) 50% 90%/.07);border:1px solid hsl(var(--h) 80% 85%/.22);
+ backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);transition:transform .25s,border-color .4s;
+ transform:perspective(800px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));overflow:hidden}
+.card:hover{border-color:var(--acc)}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(260px circle at var(--gx,50%) var(--gy,0%),hsl(var(--h) 100% 85%/.18),transparent 60%);pointer-events:none}
+.card h3{font:600 1.7rem var(--serif);font-variation-settings:"wght" 600,"SOFT" 100;color:var(--acc);margin-bottom:.4rem;transition:letter-spacing .4s,font-variation-settings .4s}
+.card:hover h3{letter-spacing:.03em;font-variation-settings:"wght" 850,"SOFT" 100}
+.card p{font-size:1.02rem;line-height:1.55}
+code,.ex{font:400 .85rem/1.5 var(--mono);display:block;margin-top:.9rem;padding:.6rem .8rem;border-radius:10px;background:#0006;color:#d9f0ff}
+.card input{font:400 .85rem var(--mono);width:100%;margin-top:.7rem;padding:.5rem .7rem;border-radius:8px;border:1px solid #fff4;background:#0005;color:#fff}
+.card input:focus-visible{outline:2px solid var(--acc)}
+.egg{position:absolute;right:.9rem;top:.8rem;background:none;border:0;font-size:1rem;cursor:pointer;opacity:.35;transition:.3s}
+.egg:hover,.egg:focus-visible{opacity:1;transform:rotate(25deg) scale(1.3)}
+/* comparison sheet */
+.sheetw{filter:drop-shadow(0 30px 40px #000a);margin-top:1rem}
+.sheet{position:relative;background:#efe6d2;color:var(--ink);padding:2.6rem 2rem;overflow:hidden;
+ clip-path:polygon(0 1.5%,6% 0,12% 1.8%,19% .3%,27% 1.6%,35% 0,44% 1.4%,52% .2%,61% 1.7%,70% 0,79% 1.3%,88% .2%,100% 1.5%,100% 98.5%,93% 100%,84% 98.4%,75% 99.8%,66% 98.3%,57% 100%,47% 98.6%,38% 99.9%,29% 98.3%,19% 100%,10% 98.5%,0 99.6%)}
+.sheet::before{content:"";position:absolute;inset:0;opacity:.22;mix-blend-mode:multiply;pointer-events:none;animation:paper 9s ease-in-out infinite alternate;
+ background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.04 .9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E")}
+@keyframes paper{to{background-position:6px 3px}}
+.sheet::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,#fff9 50%,transparent 65%);transform:translateX(-120%);pointer-events:none}
+.seen .sheet::after{animation:sweep 1.8s .7s ease-out}
+@keyframes sweep{to{transform:translateX(120%)}}
+.tw{overflow-x:auto;position:relative}
+table{width:100%;min-width:640px;border-collapse:collapse;font-size:1.02rem}
+th,td{text-align:left;padding:.85rem 1rem;vertical-align:top;border-bottom:1.5px solid #1b163026}
+th{font:700 1.25rem var(--serif);font-variation-settings:"wght" 750,"SOFT" 100}
+th:nth-child(2){color:#b4451f}th:nth-child(3){color:#2b47c4}
+td:first-child{font-weight:600;width:22%}
+tbody tr{transition:background .3s}tbody tr:hover{background:#1b16300d}
+.note{margin-top:1.1rem;font-style:italic;font-size:.98rem;max-width:62ch}
+/* finale */
+.fin{text-align:center}
+.fin h2{font-size:clamp(2.6rem,8vw,6.5rem)}
+.btn{font:500 1rem var(--serif);margin-top:2rem;padding:.9rem 1.8rem;border-radius:99px;border:1.5px solid var(--acc);background:transparent;color:var(--txt);cursor:pointer;transition:.3s}
+.btn:hover,.btn:focus-visible{background:var(--acc);color:var(--ink);outline:none;scale:1.05}
+/* splash */
+.splash{position:fixed;inset:0;z-index:100;display:grid;place-items:center;text-align:center;padding:2rem;
+ background:radial-gradient(circle at 50% 40%,#2a1d63,#0b0818 70%);clip-path:circle(150% at var(--x,50%) var(--y,50%));transition:clip-path 1.3s cubic-bezier(.7,0,.2,1)}
+.splash.out{clip-path:circle(0 at var(--x,50%) var(--y,50%));pointer-events:none}
+.splash h1{font-size:clamp(2.6rem,9vw,7rem);--w:800}
+.splash .l1{font-size:1.1rem;font-style:italic;color:#b9a8ff;margin-bottom:1.2rem;opacity:0;animation:fade 1s .2s forwards}
+.splash .l2{font-size:clamp(1.2rem,3vw,1.8rem);margin-top:1.4rem;opacity:0;animation:fade 1.2s 1.6s forwards}
+.splash .btn{opacity:0;animation:fade 1s 2.3s forwards}
+@keyframes fade{to{opacity:1}}
+.toast{position:fixed;left:50%;bottom:2rem;translate:-50% 140%;background:var(--acc);color:var(--ink);padding:.8rem 1.4rem;border-radius:99px;z-index:90;transition:translate .5s cubic-bezier(.2,.9,.3,1.3);font-weight:600}
+.toast.show{translate:-50% 0}
+@media(max-width:700px){nav{display:none}.sheet{padding:2rem 1rem}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body class="lock">
+<div class="mesh"></div><div class="beam"></div><canvas id="dust"></canvas><div class="grain"></div>
+<div class="bar"></div><div class="dot"></div><div class="trail"></div><div class="toast" id="toast" role="status"></div>
+
+<div class="splash" id="splash">
+ <div>
+  <p class="l1">Trabajo de</p>
+  <h1 class="mask" data-split>Brandon Lacayo</h1>
+  <p class="l2">Asignatura: Introducción a la Programación</p>
+  <button class="btn" id="enter">Abrir el libro</button>
+ </div>
+</div>
+
+<nav aria-label="Capítulos">
+ <a href="#portada" class="on" aria-label="Portada"></a><a href="#glosario" aria-label="Glosario"></a>
+ <a href="#comparativo" aria-label="Editor de texto vs IDE"></a><a href="#final" aria-label="Final"></a>
+</nav>
+
+<main>
+<section class="scene on" id="portada" data-h="265"><div class="glyph" data-p="-.25" style="left:-4vw;top:6vh">&lt;/&gt;</div>
+ <div class="in"><div class="wrap">
+  <p class="kick">Trabajo independiente</p>
+  <h1 class="kin mask" data-split data-mag>El lenguaje del programador</h1>
+  <p class="sub">Un glosario con mis propias palabras y una comparación entre editor de texto e IDE.</p>
+  <p class="cue"><i></i>Desliza para pasar la página</p>
+ </div></div></section>
+
+<section class="scene" id="glosario" data-h="195"><div class="glyph" data-p=".3" style="right:-6vw;bottom:2vh">{ }</div>
+ <div class="in"><div class="wrap">
+  <p class="kick">Capítulo 1 · Glosario</p>
+  <h2 class="kin" data-split data-mag>Seis palabras que todo programador usa</h2>
+  <div class="grid">
+   <article class="card tilt"><h3>IDE</h3><p>Es la “casa” completa del programador: un solo programa donde escribo el código, lo ejecuto, busco errores y organizo mis archivos. Sus siglas significan Entorno de Desarrollo Integrado.</p><span class="ex">Ej: Visual Studio, PyCharm</span></article>
+   <article class="card tilt"><h3>Concatenación</h3><p>Es pegar dos o más textos para formar uno solo, como unir piezas de un rompecabezas. Escribe tu nombre:</p><input id="cn" value="Brandon" aria-label="Tu nombre" maxlength="24"><span class="ex" id="co">"Hola, " + nombre → Hola, Brandon</span></article>
+   <article class="card tilt"><h3>Código fuente</h3><p>Son las instrucciones originales que escribo en un lenguaje que yo puedo leer. Después la computadora las traduce a su propio idioma para ejecutarlas.</p><code>print("Hola mundo")</code></article>
+   <article class="card tilt"><h3>Plugin</h3><p>Es un complemento que se instala en un programa para darle poderes extra, como ponerle colores al código o corregir mi ortografía mientras escribo.</p><span class="ex">Ej: un tema de colores para VS Code</span></article>
+   <article class="card tilt"><button class="egg" id="egg" aria-label="Atrapar el bug">🐞</button><h3>Bug</h3><p>Es un error escondido en el programa que hace que funcione mal o se detenga. Encontrarlo y arreglarlo se llama depurar.</p><code>print("Hola)  # falta una comilla</code></article>
+   <article class="card tilt"><h3>Import</h3><p>Es la orden para traer código que ya existe en otro archivo o librería y usarlo sin volver a escribirlo. Me ahorra trabajo.</p><code>import math<br>math.sqrt(16)  # 4.0</code></article>
+  </div>
+ </div></div></section>
+
+<section class="scene" id="comparativo" data-h="150"><div class="glyph" data-p="-.2" style="left:-3vw;top:4vh">VS</div>
+ <div class="in"><div class="wrap">
+  <p class="kick">Capítulo 2 · Cuadro comparativo</p>
+  <h2 class="kin" data-split data-mag>Editor de texto vs. IDE</h2>
+  <div class="sheetw"><div class="sheet"><div class="tw">
+   <table>
+    <thead><tr><th></th><th>Editor de texto</th><th>IDE</th></tr></thead>
+    <tbody>
+     <tr><td>Ayuda al escribir</td><td>Casi ninguna: solo escribes y guardas.</td><td>Autocompleta, resalta y avisa de errores mientras escribes.</td></tr>
+     <tr><td>Ejecutar y depurar</td><td>Se hace aparte, desde la terminal.</td><td>Trae botón de ejecutar y depurador para cazar bugs paso a paso.</td></tr>
+     <tr><td>Manejo de proyectos</td><td>Trabajas un archivo a la vez.</td><td>Organiza carpetas, librerías y versiones en un solo lugar.</td></tr>
+     <tr><td>Peso y velocidad</td><td>Liviano y rápido de abrir.</td><td>Más pesado; necesita más memoria.</td></tr>
+     <tr><td>Ejemplos</td><td>Bloc de notas, Notepad++</td><td>Visual Studio, PyCharm, IntelliJ</td></tr>
+    </tbody>
+   </table></div>
+   <p class="note">Dato curioso: VS Code nació como editor, pero con plugins se comporta casi como un IDE.</p>
+  </div></div>
+ </div></div></section>
+
+<section class="scene fin" id="final" data-h="20"><div class="glyph" data-p=".35" style="left:50%;translate:-50% 0;top:10vh">;</div>
+ <div class="in"><div class="wrap">
+  <p class="kick">Fin del libro</p>
+  <h2 class="kin mask" data-split data-mag>Escribir, probar, corregir. Repetir.</h2>
+  <p class="sub" style="margin-inline:auto">Gracias por leer. — Brandon Lacayo</p>
+  <button class="btn" id="top">Volver a la portada</button>
+ </div></div></section>
+</main>
+
+<script>
+const $=(s,c=document)=>c.querySelector(s),$$=(s,c=document)=>[...c.querySelectorAll(s)];
+const root=document.documentElement,RM=matchMedia('(prefers-reduced-motion:reduce)').matches;
+$$('[data-split]').forEach(el=>{const t=el.textContent;el.textContent='';el.setAttribute('aria-label',t);
+ [...t].forEach((c,i)=>{const s=document.createElement('span');s.className='ch';s.setAttribute('aria-hidden','true');
+  s.textContent=c===' '?'\u00a0':c;s.style.setProperty('--i',i);el.appendChild(s)})});
+$('#splash h1').querySelectorAll('.ch').forEach(c=>c.style.setProperty('--d','500ms'));
+/* splash portal */
+const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800)};
+$('#enter').onclick=e=>{const sp=$('#splash');sp.style.setProperty('--x',e.clientX+'px');sp.style.setProperty('--y',e.clientY+'px');
+ sp.classList.add('out');document.body.classList.remove('lock');$('#portada').classList.add('seen');burst=2;
+ setTimeout(()=>sp.style.display='none',1400)};
+/* chapters: ambient hue, depth of field, reveals */
+let burst=0;
+const scenes=$$('.scene'),dots=$$('nav a');
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const s=e.target;
+ scenes.forEach(x=>x.classList.toggle('on',x===s));dots.forEach((d,i)=>d.classList.toggle('on',scenes[i]===s));
+ root.style.setProperty('--h',s.dataset.h);
+ if(s.id!=='portada'||$('#splash').classList.contains('out'))s.classList.add('seen');
+ if(s.id==='final')burst=3;}),{rootMargin:'-48% 0px -48% 0px'});
+scenes.forEach(s=>io.observe(s));
+/* interactions */
+$('#cn').oninput=e=>{$('#co').textContent='"Hola, " + nombre → Hola, '+(e.target.value||'…')};
+$('#egg').onclick=()=>{toast('¡Atrapaste el bug! Ya puedes depurar en paz.');burst=3};
+$('#top').onclick=()=>scrollTo({top:0,behavior:RM?'auto':'smooth'});
+$$('.tilt').forEach(c=>{c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+ c.style.setProperty('--ry',((x-.5)*10).toFixed(1)+'deg');c.style.setProperty('--rx',((.5-y)*10).toFixed(1)+'deg');
+ c.style.setProperty('--gx',x*100+'%');c.style.setProperty('--gy',y*100+'%')});
+ c.addEventListener('pointerleave',()=>{c.style.setProperty('--rx','0deg');c.style.setProperty('--ry','0deg')})});
+/* cursor trail + magnetic letters */
+const dot=$('.dot'),tr=$('.trail');let mx=innerWidth/2,my=innerHeight/2,tx=mx,ty=my,moved=false;
+addEventListener('pointermove',e=>{mx=e.clientX;my=e.clientY;moved=true});
+const mags=$$('[data-mag] .ch');
+/* dust motes */
+const cv=$('#dust'),cx=cv.getContext('2d');let W,H;
+const rs=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight};rs();addEventListener('resize',rs);
+const P=Array.from({length:RM?0:70},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.8+.4,v:Math.random()*.25+.05,t:Math.random()*6}));
+/* main loop */
+let lastY=scrollY,sv=0;
+function frame(){
+ const y=scrollY,d=y-lastY;lastY=y;
+ sv+=(Math.max(-1,Math.min(1,d/55))-sv)*.12;
+ root.style.setProperty('--sv',sv.toFixed(3));root.style.setProperty('--av',Math.abs(sv).toFixed(3));
+ $('.bar').style.transform='scaleX('+(y/((root.scrollHeight-innerHeight)||1))+')';
+ $$('.glyph').forEach(g=>{const r=g.parentElement.getBoundingClientRect();g.style.transform='translate3d(0,'+((r.top+r.height/2-innerHeight/2)*parseFloat(g.dataset.p)).toFixed(1)+'px,0)'});
+ $$('.kin').forEach(h=>{const r=h.getBoundingClientRect(),t=Math.min(1,Math.abs((r.top+r.height/2)/innerHeight-.5)*2);
+  h.style.setProperty('--w',Math.round(880-t*600));h.style.setProperty('--s',Math.round(100-t*90));h.style.setProperty('--ls',(-.045+t*.05).toFixed(3)+'em')});
+ tx+=(mx-tx)*.15;ty+=(my-ty)*.15;dot.style.transform='translate('+mx+'px,'+my+'px)';tr.style.transform='translate('+tx+'px,'+ty+'px) scale(.6)';
+ if(moved){moved=false;mags.forEach(c=>{const r=c.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight){return}
+  const dx=mx-(r.left+r.width/2),dy=my-(r.top+r.height/2),dist=Math.hypot(dx,dy);
+  c.style.translate=dist<130?(-dx/dist*(130-dist)*.18).toFixed(1)+'px '+(-dy/dist*(130-dist)*.18).toFixed(1)+'px':'0 0'})}
+ cx.clearRect(0,0,W,H);burst*=.96;
+ P.forEach(p=>{p.t+=.02;p.y-=p.v+Math.abs(sv)*3+burst*1.5;p.x+=Math.sin(p.t)*.3+sv*.4;
+  if(p.y<-5){p.y=H+5;p.x=Math.random()*W}if(p.x<-5)p.x=W+5;if(p.x>W+5)p.x=-5;
+  cx.globalAlpha=.25+.35*Math.abs(Math.sin(p.t));cx.fillStyle='#ffeccc';cx.beginPath();cx.arc(p.x,p.y,p.r,0,7);cx.fill()});
+ requestAnimationFrame(frame)}
+frame();
+</script>
+</body>
+</html>
